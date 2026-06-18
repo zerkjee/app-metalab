@@ -1,0 +1,12 @@
+.next
+node_modules
+.env*
+.vercel
+*.log
+data
+.DS_Store
+*.traineddata
+work/swift_cache/
+work/rendered_condroless/
+work/nuvisa_checklist_imagens/
+outputs/

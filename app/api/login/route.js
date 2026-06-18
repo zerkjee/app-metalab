@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+import { getUserByEmail } from "@/lib/db";
+import { ensureOwner, verifyPassword, createSession, SESSION_COOKIE } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+
+export const runtime = "nodejs";
+
+const loginLimit = rateLimit({ windowMs: 60_000, max: 8 });
+
+export async function POST(request) {
+  const blocked = loginLimit(request);
+  if (blocked) return blocked;
+
+  const form = await request.formData();
+  const email = String(form.get("email") || "").toLowerCase().trim();
+  const password = String(form.get("password") || "");
+
+  await ensureOwner();
+
+  const user = await getUserByEmail(email);
+  if (!user || Number(user.active) !== 1 || !verifyPassword(password, user.password_hash)) {
+    return NextResponse.json({ ok: false, error: "E-mail ou senha invalidos." }, { status: 401 });
+  }
+
+  const token = createSession(user.id);
+  const response = NextResponse.json({ ok: true, isAdmin: Number(user.is_admin) === 1 });
+  response.cookies.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60,
+  });
+  return response;
+}
