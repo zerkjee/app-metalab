@@ -50,12 +50,12 @@ function CheckoutContent() {
     fetch("/api/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((m) => {
-        if (!m) { window.location.href = `/login?next=/checkout?plan=${plan}`; return; }
+        if (!m) { window.location.href = `/login?next=${encodeURIComponent(`/checkout?plan=${plan}`)}`; return; }
         setMe(m);
         setForm((f) => ({ ...f, name: m.name || "" }));
         if (m.plan === plan) setStep("already");
       })
-      .catch(() => { window.location.href = `/login?next=/checkout?plan=${plan}`; });
+      .catch(() => { window.location.href = `/login?next=${encodeURIComponent(`/checkout?plan=${plan}`)}`; });
   }, [plan]);
 
   if (!planInfo) {

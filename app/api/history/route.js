@@ -14,7 +14,7 @@ export async function GET(request) {
     if (id) {
       const record = await getAnalysis(id);
       if (!record) return Response.json({ error: "Analise nao encontrada." }, { status: 404 });
-      if (record.user_id && record.user_id !== user.id && Number(user.is_admin) !== 1) {
+      if (Number(user.is_admin) !== 1 && record.user_id !== user.id) {
         return Response.json({ error: "Acesso negado." }, { status: 403 });
       }
       return Response.json(record);

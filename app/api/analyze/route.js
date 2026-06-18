@@ -35,7 +35,12 @@ export async function POST(request) {
   const blocked = analyzeLimit(request);
   if (blocked) return blocked;
 
-  const formData = await request.formData();
+  let formData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return Response.json({ error: "Dados invalidos." }, { status: 400 });
+  }
 
   const user = await getSessionUser(request);
   if (!user) return Response.json({ error: "Nao autenticado." }, { status: 401 });

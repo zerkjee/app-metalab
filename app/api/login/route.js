@@ -11,7 +11,12 @@ export async function POST(request) {
   const blocked = loginLimit(request);
   if (blocked) return blocked;
 
-  const form = await request.formData();
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ ok: false, error: "Dados invalidos." }, { status: 400 });
+  }
   const email = String(form.get("email") || "").toLowerCase().trim();
   const password = String(form.get("password") || "");
 

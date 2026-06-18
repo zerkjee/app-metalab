@@ -26,7 +26,8 @@ export default function LoginPage() {
     }
 
     const searchParams = new URLSearchParams(window.location.search);
-    window.location.href = searchParams.get("next") || "/app";
+    const next = searchParams.get("next") || "/app";
+    window.location.href = next.startsWith("/") && !next.startsWith("//") ? next : "/app";
   }
 
   return (

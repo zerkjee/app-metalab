@@ -8,7 +8,12 @@ export async function POST(request) {
   const user = await getSessionUser(request);
   if (!user) return Response.json({ error: "Não autenticado." }, { status: 401 });
 
-  const formData = await request.formData();
+  let formData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return Response.json({ error: "Dados invalidos." }, { status: 400 });
+  }
   const files = formData
     .getAll("packageFiles")
     .filter((file) => file instanceof File && file.size > 0);

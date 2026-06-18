@@ -1,5 +1,5 @@
-const CACHE = "metalab-v1";
-const PRECACHE = ["/", "/app", "/precos", "/icon-192.png", "/icon-512.png"];
+const CACHE = "metalab-v2";
+const PRECACHE = ["/", "/precos", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
