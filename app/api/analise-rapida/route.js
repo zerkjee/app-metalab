@@ -11,10 +11,10 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-const analyzeLimit = rateLimit({ windowMs: 60_000, max: 10 });
+const analyzeLimit = rateLimit({ windowMs: 60_000, max: 10, prefix: "analise-rapida" });
 
 export async function POST(request) {
-  const blocked = analyzeLimit(request);
+  const blocked = await analyzeLimit(request);
   if (blocked) return blocked;
 
   const user = await getSessionUser(request);

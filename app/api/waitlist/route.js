@@ -6,10 +6,10 @@ import { rateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const waitlistLimit = rateLimit({ windowMs: 60_000, max: 5 });
+const waitlistLimit = rateLimit({ windowMs: 60_000, max: 5, prefix: "waitlist" });
 
 export async function POST(request) {
-  const blocked = waitlistLimit(request);
+  const blocked = await waitlistLimit(request);
   if (blocked) return blocked;
   let data = {};
   try {

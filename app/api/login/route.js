@@ -5,10 +5,10 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-const loginLimit = rateLimit({ windowMs: 60_000, max: 8 });
+const loginLimit = rateLimit({ windowMs: 60_000, max: 8, prefix: "login" });
 
 export async function POST(request) {
-  const blocked = loginLimit(request);
+  const blocked = await loginLimit(request);
   if (blocked) return blocked;
 
   let form;
