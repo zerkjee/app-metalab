@@ -85,40 +85,20 @@ export default function AnaliseRapidaPage() {
     <main className="shell">
       <aside className="sidebar">
         <Brand subtitle="Rotulagem regulatória" />
-
         <div className="nav-section">
-          <p className="nav-label">Ferramentas</p>
-          <a className="nav-item nav-link" href="/app">Análise com IA</a>
-          <a className="nav-item nav-link" href="/app/analise-rapida" style={{ background: "rgba(255,255,255,0.08)", borderRadius: 6 }}>
-            Análise por texto
+          <a className="nav-item nav-link" href="/app">IA</a>
+          <a className="nav-item nav-link" href="/app/analise-rapida" style={{ background: "rgba(255,255,255,0.12)", borderRadius: 6 }}>
+            Texto
           </a>
         </div>
-
-        {me && (
-          <div className="nav-section">
-            <p className="nav-label">Meu plano</p>
-            <div className="nav-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span>{me.planLabel || "Grátis"}</span>
-              <span className={`badge ${me.plan === "pro" || me.plan === "business" ? "A" : "SE"}`} style={{ fontSize: 11 }}>
-                {me.plan || "free"}
-              </span>
-            </div>
-            <div className="nav-item muted" style={{ fontSize: 12 }}>
-              Análises: {me.analysesThisMonth}/{me.monthlyAnalyses}
-            </div>
-          </div>
-        )}
-
-        <div className="nav-section" style={{ marginTop: "auto" }}>
-          <button className="button" style={{ width: "100%", marginTop: 8 }} onClick={logout}>Sair</button>
-        </div>
+        <button className="button" onClick={logout} style={{ marginLeft: "auto", fontSize: 12, minHeight: 32, padding: "4px 10px" }}>Sair</button>
       </aside>
 
       <section className="content">
         <div className="topbar">
           <h1 className="page-title">Análise rápida por texto</h1>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div className="status-pill">Motor determinístico · sem IA</div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div className="status-pill">Determinístico · sem IA</div>
             {report && (
               <button className="button" onClick={downloadReport}>Baixar (.md)</button>
             )}
