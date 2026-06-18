@@ -19,7 +19,10 @@ export async function GET(request) {
       }
       return Response.json(record);
     }
-    return Response.json({ items: await listAnalyses(50) });
+    const items = Number(user.is_admin) === 1
+      ? await listAnalyses(50)
+      : await listAnalyses(50, user.id);
+    return Response.json({ items });
   } catch (error) {
     return Response.json(
       { error: error instanceof Error ? error.message : "Falha ao acessar o historico.", items: [] },
