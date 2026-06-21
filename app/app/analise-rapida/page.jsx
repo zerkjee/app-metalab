@@ -43,6 +43,11 @@ export default function AnaliseRapidaPage() {
     setLoading(true);
     setError("");
     setReport("");
+    const mascote = (state) =>
+      window.dispatchEvent(
+        new CustomEvent("metalab:mascote", { detail: { state } })
+      );
+    mascote("scanning");
     try {
       const res = await fetch("/api/analise-rapida", {
         method: "POST",
@@ -52,8 +57,10 @@ export default function AnaliseRapidaPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Falha ao analisar.");
       setReport(data.reportMd || "");
+      mascote(/ALTO RISCO|REVISAR/i.test(data.reportMd || "") ? "warning" : "success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao analisar.");
+      mascote("error");
     } finally {
       setLoading(false);
     }
