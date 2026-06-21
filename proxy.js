@@ -51,9 +51,14 @@ export async function proxy(request) {
   const { pathname } = request.nextUrl;
   if (isPublicPath(pathname)) return NextResponse.next();
 
-  const secret = process.env.SESSION_SECRET || "metalab-dev-session-secret-troque-em-producao";
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  if (await verifySession(token, secret)) return NextResponse.next();
+  const envSecret = process.env.SESSION_SECRET;
+  // Em produção sem SESSION_SECRET, NÃO validar com o default público (seria
+  // forjável): falha fechado tratando como não autenticado (vai pro login).
+  if (envSecret || process.env.NODE_ENV !== "production") {
+    const secret = envSecret || "metalab-dev-session-secret-troque-em-producao";
+    const token = request.cookies.get(SESSION_COOKIE)?.value;
+    if (await verifySession(token, secret)) return NextResponse.next();
+  }
 
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = "/login";
