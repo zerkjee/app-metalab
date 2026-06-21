@@ -2,12 +2,19 @@ import { getSessionUser } from "@/lib/auth";
 import { setUserPlan } from "@/lib/db";
 import { createCheckout, PLAN_PRICES } from "@/lib/payments";
 import { notifyOwner, msgPagamento } from "@/lib/notify";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+// Cada "create" chama a API externa do provedor — limita abuso/custo.
+const checkoutLimit = rateLimit({ windowMs: 60_000, max: 12, prefix: "checkout" });
 
 export async function POST(request) {
   const user = await getSessionUser(request);
   if (!user) return Response.json({ error: "login necessario" }, { status: 401 });
+
+  const blocked = await checkoutLimit(request);
+  if (blocked) return blocked;
 
   let data = {};
   try { data = await request.json(); } catch {
@@ -38,8 +45,12 @@ export async function POST(request) {
   }
 
   if (action === "confirm_mock") {
-    if (process.env.NODE_ENV === "production") {
-      return Response.json({ error: "mock desabilitado em produção" }, { status: 403 });
+    // Bloqueia o upgrade-mock em produção OU quando há um provedor REAL
+    // configurado (evita upgrade grátis em staging/preview com dados reais).
+    // Provider vazio = mock (default), permitido só fora de produção.
+    const provider = process.env.PAYMENT_PROVIDER || "mock";
+    if (process.env.NODE_ENV === "production" || provider !== "mock") {
+      return Response.json({ error: "mock desabilitado" }, { status: 403 });
     }
     await setUserPlan(user.id, plan, undefined);
     notifyOwner("Pagamento confirmado", msgPagamento({ email: user.email, planLabel: PLAN_PRICES[plan].label }));

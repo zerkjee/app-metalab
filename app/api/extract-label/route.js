@@ -1,8 +1,12 @@
 import { extractLabelText } from "@/lib/label-extraction";
 import { getSessionUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
+
+// OCR é caro (tesseract/sharp/pdf-parse, até 8 arquivos x 10MB). Limita abuso/custo.
+const extractLimit = rateLimit({ windowMs: 60_000, max: 5, prefix: "extract" });
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB por arquivo
 const MAX_FILES = 8;
@@ -23,6 +27,9 @@ async function fileLooksValid(file) {
 export async function POST(request) {
   const user = await getSessionUser(request);
   if (!user) return Response.json({ error: "Não autenticado." }, { status: 401 });
+
+  const blocked = await extractLimit(request);
+  if (blocked) return blocked;
 
   let formData;
   try {
@@ -61,11 +68,10 @@ export async function POST(request) {
     const extraction = await extractLabelText(files);
     return Response.json(extraction);
   } catch (error) {
+    // Loga o detalhe no servidor; não vaza stack/caminho interno ao cliente.
+    console.error("extract-label falhou:", error);
     return Response.json(
-      {
-        error: "Nao foi possivel extrair o texto da embalagem.",
-        detail: error instanceof Error ? error.message : "Erro desconhecido.",
-      },
+      { error: "Nao foi possivel extrair o texto da embalagem." },
       { status: 500 }
     );
   }

@@ -42,6 +42,15 @@ export async function POST(request) {
 
   // ── Asaas ─────────────────────────────────────────────────────────────────
   if (provider === "asaas") {
+    // Verificação de autenticidade: o Asaas envia o token configurado no
+    // header `asaas-access-token`. Sem isso, qualquer um postaria um
+    // "PAYMENT_CONFIRMED" e ativaria plano pago de graça. Falha fechado.
+    const expected = process.env.ASAAS_WEBHOOK_TOKEN;
+    const got = request.headers.get("asaas-access-token");
+    if (!expected || got !== expected) {
+      return new Response("unauthorized", { status: 401 });
+    }
+
     let body = {};
     try { body = await request.json(); } catch {}
 
