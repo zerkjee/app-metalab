@@ -52,7 +52,10 @@ export async function proxy(request) {
   if (isPublicPath(pathname)) return NextResponse.next();
 
   const secret = process.env.SESSION_SECRET || "metalab-dev-session-secret-troque-em-producao";
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  // Aceita sessão via cookie (web) OU Authorization: Bearer <token> (mobile).
+  const authz = request.headers.get("authorization") || "";
+  const bearer = /^bearer /i.test(authz) ? authz.slice(7).trim() : null;
+  const token = bearer || request.cookies.get(SESSION_COOKIE)?.value;
   if (await verifySession(token, secret)) return NextResponse.next();
 
   const loginUrl = request.nextUrl.clone();
