@@ -1,0 +1,112 @@
+/* Mascote "Méti, o Inspetor" — animações 100% CSS (transform/opacity). */
+
+.wrap {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none; /* não bloqueia cliques do app; botões reativam abaixo */
+  user-select: none;
+}
+
+.bubble {
+  max-width: 220px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 8px 12px;
+  border-radius: 14px 14px 4px 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.bubble[data-show="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.char {
+  width: 84px;
+  height: 84px;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.22));
+  animation: bob 3.4s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+/* respiração/idle */
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-1deg); }
+}
+
+/* piscar */
+.eyelid {
+  transform-origin: center;
+  animation: blink 5s infinite;
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(0); }
+  95% { transform: scaleY(1); }
+}
+
+/* pupilas seguem o cursor via --px/--py (-1..1) */
+.pupil {
+  transition: transform 0.12s ease-out;
+  transform: translate(calc(var(--px, 0) * 3px), calc(var(--py, 0) * 2.5px));
+}
+
+/* lupa */
+.lupa {
+  transform-origin: 58px 58px;
+}
+
+/* ---- Estados ---- */
+.char[data-state="scanning"] .lupa,
+.char[data-state="thinking"] .lupa {
+  animation: scan 1.2s ease-in-out infinite;
+}
+@keyframes scan {
+  0%, 100% { transform: translate(-8px, 2px) rotate(-6deg); }
+  50% { transform: translate(8px, -2px) rotate(6deg); }
+}
+
+.char[data-state="success"] { animation: pop 0.5s ease; }
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12) translateY(-6px); }
+  100% { transform: scale(1); }
+}
+
+.char[data-state="warning"],
+.char[data-state="error"] { animation: shake 0.5s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px) rotate(-3deg); }
+  60% { transform: translateX(5px) rotate(3deg); }
+}
+
+.char[data-state="greeting"] .arm { animation: wave 0.7s ease 2; transform-origin: 24px 54px; }
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-22deg); }
+}
+
+/* halo de status */
+.halo { opacity: 0; transition: opacity 0.3s ease; }
+.char[data-state="success"] .halo { opacity: 0.9; stroke: #16a34a; }
+.char[data-state="warning"] .halo { opacity: 0.9; stroke: #d97706; }
+.char[data-state="error"] .halo { opacity: 0.9; stroke: #dc2626; }
+.char[data-state="scanning"] .halo,
+.char[data-state="thinking"] .halo { opacity: 0.7; stroke: #0ea5e9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .char, .eyelid, .lupa, .arm { animation: none !important; }
+}
