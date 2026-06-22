@@ -56,7 +56,10 @@ export async function proxy(request) {
   // forjável): falha fechado tratando como não autenticado (vai pro login).
   if (envSecret || process.env.NODE_ENV !== "production") {
     const secret = envSecret || "metalab-dev-session-secret-troque-em-producao";
-    const token = request.cookies.get(SESSION_COOKIE)?.value;
+    // Aceita sessão via cookie (web) OU Authorization: Bearer <token> (mobile).
+    const authz = request.headers.get("authorization") || "";
+    const bearer = /^bearer /i.test(authz) ? authz.slice(7).trim() : null;
+    const token = bearer || request.cookies.get(SESSION_COOKIE)?.value;
     if (await verifySession(token, secret)) return NextResponse.next();
   }
 

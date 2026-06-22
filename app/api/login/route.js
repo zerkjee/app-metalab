@@ -28,7 +28,8 @@ export async function POST(request) {
   }
 
   const token = createSession(user.id);
-  const response = NextResponse.json({ ok: true, isAdmin: Number(user.is_admin) === 1 });
+  // `token` também vai no corpo para clientes mobile (Authorization: Bearer).
+  const response = NextResponse.json({ ok: true, isAdmin: Number(user.is_admin) === 1, token });
   response.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
