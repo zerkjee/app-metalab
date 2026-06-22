@@ -80,7 +80,7 @@ export function Mascote() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || !document.body) return null;
 
   return createPortal(
     <div className={styles.wrap} aria-live="polite">
