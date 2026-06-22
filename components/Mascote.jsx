@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { MASCOTE_EVENT } from "@/lib/mascote-bus";
 import styles from "./Mascote.module.css";
 
@@ -26,8 +27,13 @@ const AUTO_IDLE = { greeting: 2600, success: 3200, warning: 3600, error: 3200 };
 export function Mascote() {
   const [state, setState] = useState("greeting");
   const [message, setMessage] = useState(FALAS.greeting);
+  const [mounted, setMounted] = useState(false);
   const charRef = useRef(null);
   const idleTimer = useRef(null);
+
+  // Portala para o body só no client (evita SSR e ancestrais com transform,
+  // que "prendem" o position:fixed e tiram o mascote do canto da tela).
+  useEffect(() => setMounted(true), []);
 
   // Reage aos eventos do barramento.
   useEffect(() => {
@@ -74,7 +80,9 @@ export function Mascote() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className={styles.wrap} aria-live="polite">
       <div className={styles.bubble} data-show={message ? "true" : "false"}>
         {message}
@@ -130,7 +138,8 @@ export function Mascote() {
           </g>
         </g>
       </svg>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
